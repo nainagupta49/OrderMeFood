@@ -1,0 +1,3 @@
+R2 6 1 Qeema_Matar 1 250
+R2 6 2 appam 2 upma 1 470
+R2 6 1 Mughlai_Paratha 1 50
