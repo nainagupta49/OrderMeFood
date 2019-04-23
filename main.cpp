@@ -283,7 +283,7 @@ void menu(string loc,string uid){
     if(!foout){
     cout<<"ordered.txt not opened";
     }
-    foout<<"\n"<<rloc<<" "<<uid<<" "<<ocount<<" ";
+    foout<<"\n"<<rloc<<loc<<" "<<uid<<" "<<ocount<<" ";
     for(int dco=0;dco<ocount;dco++)
         foout<<odish[dco]<<" "<<oqty[dco]<<" ";
     foout<<bill;
@@ -375,6 +375,38 @@ void user::createNewUser(){
     cout<<"------------Id created sucessfully.Enjoy OrderMeFood!!------------";
     menu(code,userId);
 }
+
+adminu(string rid)
+{
+  rid2=rid+"orders.txt";
+  ifstream fin;
+  fin(rid2);
+  if(!fin)
+  {
+    cout<<"restaurant does not exist";
+  }
+  while(fin)
+  {
+    str uloc[20]='0';
+    str currloc;
+    int index=0;
+    while(getline(fin,currloc))
+    {
+      str getuloc=currloc[0]+currloc[1]+currloc[2];
+      if(getuloc[2]==" ")
+      {
+        getuloc.pop_back();
+      }
+      uloc[index++]=getuloc;
+    }
+    // apply steiner on map with restaurant rid and locations in uloc array
+    uloc[index]=rid;
+    steiner(uloc);
+  }
+
+
+}
+
 int main()
 {
     int var=0;
@@ -387,7 +419,12 @@ int main()
         U.userLogin();
         }
     else if(var==2){
-       cout<<"Check Orders";
+          cout<<"Enter Restaurant\n";
+          str rid;
+          cin>>rid;
+          adminu(rid);
+
+//       cout<<"Work Under Construction:";
     }
     else{
         exit(0);
