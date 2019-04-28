@@ -5,8 +5,6 @@
 #include<cstring>
 #include<cstdlib>
 #include<climits>
-//#include<graphics.h>
-//#include<windows.h>
 #include<cwchar>
 using namespace std;
 
@@ -181,6 +179,7 @@ void menu(string loc,string uid){
     cout<<"\n\t======================================================================================================================================="<<endl;
     cout<<"Enter cuisine number:";
     cin>>a;
+    string cno="C"+a;
     system("clear");
     ifstream fin;
     fin.open("Rcuisines.txt");
@@ -277,19 +276,132 @@ void menu(string loc,string uid){
     for(int dco=0;dco<ocount;dco++)
         cout<<"\n\n"<<odish[dco]<<"\t\t\t"<<oqty[dco];
     cout<<"\nTotal bill: "<<bill<<endl;
-    //-------------writing order in file-----------------
+    //------writing order in user file for future suggestions---------------
+    ifstream feedin;
+    fstream feedout;
+    feedin.open("userHistory.txt");
+    feedout.open("tempHistory.txt",ios::out);
+    if(!feedin)
+      cout<<"userHistory file not opened\n";
+    if(!feedout)
+      cout<<"tempHistory file not opened\n";
+    string uidd,cnam;
+    int ccno=8;
+    int cprice,ff;
+    int ccount;
+    int tdsum=0;
+    for(int dco=0;dco<ocount;dco++)
+        tdsum+=oqty[dco];
+    while(feedin>>uidd){
+      feedout<<"\n"<<uidd<<" ";
+      for(int i=1;i<=ccno;i++){
+        feedin>>cnam>>cprice>>ccount;
+        //ff=((int)cnam[1])-48;
+        if(uidd==uid && cno==cnam){
+          cprice+=bill;
+          ccount+=tdsum;
+      }
+        feedout<<cnam<<" "<<cprice<<" "<<ccount<<" ";
+    }
+    }
+    feedin.close();
+    feedout.close();
+    remove("userHistory.txt");
+    rename("tempHistory.txt","userHistory.txt");
+
+    //-------------writing all order in one file for future rating purpose-----------------
     fstream foout;
     foout.open("ordered.txt", ios::out | ios::app);
     if(!foout){
     cout<<"ordered.txt not opened";
     }
-    foout<<"\n"<<rloc<<loc<<" "<<uid<<" "<<ocount<<" ";
+    foout<<"\n"<<uid<<" "<<rloc<<" "<<cno<<" "<<bill<<" "<<ocount<<" ";
+    for(int dco=0;dco<ocount;dco++)
+        foout<<odish[dco]<<" "<<oqty[dco]<<" ";
+    foout.close();
+    //-------------writing order in specific restaurant file to apply stenner algo-----------------
+    string x1=rloc+"orders.txt";
+    foout.open(x1, ios::out | ios::app);
+    if(!foout){
+    cout<<rloc<<"orders.txt not opened\n";
+    }
+    foout<<"\n"<<loc<<" "<<" "<<uid<<" "<<ocount<<" ";
     for(int dco=0;dco<ocount;dco++)
         foout<<odish[dco]<<" "<<oqty[dco]<<" ";
     foout<<bill;
     foout.close();
 }
 
+void feedback(string uid){
+  ifstream fin;
+  fstream fout;
+  fin.open("ordered.txt");
+  fout.open("tempord.txt",ios::out);
+  if(!fin)
+    cout<<"ordered.txt file not found for FEEDBACK\n";
+  if(!fout){
+    cout<<"tempord.txt not opened for FEEDBACK\n";
+    }
+  string id;
+  int tbill,tdish,dqty[10];
+  string rloc,cusi,dname[10];
+  while (fin>>id) {
+      float fd;
+      fin>>rloc>>cusi>>tbill>>tdish;
+      for(int i=0;i<tdish;i++){
+        fin>>dname[i]>>dqty[i];
+      }
+      if(id==uid){
+      cout<<"\n\t\t ******** Time For Some FEEDBACK ********\n\n";
+      cout<<"Rate your previous dishes out of 5: \n";
+      cout<<"Restaurant :"<<rloc;
+      cout<<"\n\tYou ordered "<<tdish<<"dishes :\n";
+      for(int i=0;i<tdish;i++){
+        cout<<dname[i]<<"\t"<<dqty[i]<<endl;
+      }
+      cout<<"You Paid:  "<<tbill<<endl;
+      cout<<"Enter your rating [out of 5]: ";
+      cin>>fd;
+      ifstream feedin;
+      fstream feedout;
+      feedin.open("feedbackAll.txt");
+      feedout.open("tempfeedback.txt",ios::out);
+      if(!feedin)
+        cout<<"feedbackAll file not opened\n";
+      if(!feedout)
+        cout<<"tempfeedback file not opened\n";
+      string rname,cname;
+      int peoplect;
+      float rating;
+      while(feedin>>rname){
+        feedin>>cname>>rating>>peoplect;
+        if(rloc==rname && cname==cusi){
+          peoplect+=1;
+          rating+=fd;
+        }
+        feedout<<"\n"<<rname<<" "<<cname<<" "<<rating<<" "<<peoplect;
+      }
+      feedin.close();
+      feedout.close();
+      remove("feedbackAll.txt");
+      rename("tempfeedback.txt","feedbackAll.txt");
+      }
+      else{
+        fout<<"\n"<<id<<" "<<rloc<<" "<<cusi<<" "<<tbill<<" "<<tdish<<" ";
+        for(int i=0;i<tdish;i++){
+          fout<<dname[i]<<" "<<dqty[i]<<" ";
+        }
+      }
+  }
+fout.close();
+fin.close();
+remove("ordered.txt");
+rename("tempord.txt","ordered.txt");
+}
+void suggestion(string userId){
+  //to give suggestions
+  cout<<"\n\n\n\n\n\t****SUGGESTIONS for you****";
+}
 void user::userLogin(){
     system("clear");
     cout<<"\t\t\t\t If new user enter id=0 and pass=0"<<endl;
@@ -327,6 +439,8 @@ void user::userLogin(){
         exit(0);
     }
     else{
+        feedback(userId);
+        suggestions(userId);
         menu(cd,userId);
         }
     }
@@ -340,7 +454,6 @@ string checklocation(string loc){
         flin>>l;
         if(l==loc){
             cout<<"correct location found"<<loc;
-
             f=1;
             flin>>cd;
             cout<<cd;
@@ -372,10 +485,14 @@ void user::createNewUser(){
     fout<<fname<<" "<<lname<<" "<<userId<<" "<<pin<<" "<<location<<" "<<code<<endl;
     fout.close();
     system("clear");
+    //----Enter a new entry in userHistory-------------------
+    fout.open("userHistory.txt",ios::app);
+    fout<<endl<<userId<<" C1 0 0 C2 0 0 C3 0 0 C4 0 0 C5 0 0 C6 0 0 C7 0 0 C8 0 0 ";
+    fout.close();
     cout<<"------------Id created sucessfully.Enjoy OrderMeFood!!------------";
     menu(code,userId);
 }
-
+/*
 adminu(string rid)
 {
   rid2=rid+"orders.txt";
@@ -406,13 +523,12 @@ adminu(string rid)
 
 
 }
-
+*/
 int main()
 {
     int var=0;
-    system("color 80");
-    cout<<"\n\n\n\t\t\t\t\t\t ========== WELCOME TO FOOD ORDERING SYSTEM =========="<<endl;
-    cout<<"\t\t\t\t[1] USER\n\t\t\t\t[2] ADMIN\n\t\t\t\t[3] EXIT\nEnter choice:  ";
+    cout<<"\n\n\n\t=============== WELCOME TO FOOD ORDERING SYSTEM ===============\n\n\n"<<endl;
+    cout<<"\t\t\t\t[1] USER\n\t\t\t\t[2] ADMIN\n\t\t\t\t[3] EXIT\n\n\n\nEnter choice:  ";
     cin>>var;
     if(var==1){
         user U;
@@ -420,9 +536,9 @@ int main()
         }
     else if(var==2){
           cout<<"Enter Restaurant\n";
-          str rid;
+          string rid;
           cin>>rid;
-          adminu(rid);
+          //adminu(rid);
 
 //       cout<<"Work Under Construction:";
     }

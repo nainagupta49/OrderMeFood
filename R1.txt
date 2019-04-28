@@ -11,14 +11,14 @@ C2
 3 Mughlai_Paratha 50 10
 4 Qeema_Matar 250 20
 5 Murg_kabab 370 25
-6 Murg_Musallam 380 25 
+6 Murg_Musallam 380 25
 C3
 1 chilly_potato 180 20
 2 munchurian 200 20
 3 chowmien 140 20
 4 momos 160 15
 5 Fried_Rice 180 20
-6 Spring_Roll 170 20 
+6 Spring_Roll 170 20
 C4
 1 chicken_cheese_salad 200 10
 2 baked_potato 220 20
@@ -46,7 +46,7 @@ C7
 3 tom_kha_hai 350 30
 4 pad_thai 320 30
 5 khao_pad 300 25
-6 gaeng_daeng 280 20 
+6 gaeng_daeng 280 20
 C8
 1 carbonara 320 30
 2 lasagne 300 20
@@ -54,3 +54,4 @@ C8
 4 pansotti_alla_genovese 380 35
 5 ciceri_e_tria 280 30
 6 fettuccine_alfredo 300 20
+C9
