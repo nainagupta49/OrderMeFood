@@ -130,6 +130,8 @@ void printRestaurants(int dist[], int l,struct Gnode * G,string d[],int rnum)
 void dijkstra(string s,string d[],int rnum){
     struct Gnode * G= createGraph();
     int l=countRL();
+    string path[l];
+    int pct=0;
     int src;
     struct Gnode * tmp=G;
     for(int i=0;i<l;i++){
@@ -138,19 +140,21 @@ void dijkstra(string s,string d[],int rnum){
         break;
         }
     }
+    path[pct++]=s;
     int * dist=new int[l];
     int * sptSet=new int[l];
     for(int i=0;i<l;i++){
-        dist[i]=100;
+        dist[i]=INT_MAX;
         sptSet[i]=0;
         }
 
     dist[src]=0;
     int v;
-    Gnode * tmpk;
+    struct Gnode * tmpk;
      for (int count = 0; count < l-1; count++) {
         int u = minDistance(dist, sptSet,l);
         sptSet[u] = 1;
+
        // Update dist value of the adjacent vertices of the picked vertex.
        tmp=G[u].next;
        while(tmp){
@@ -493,35 +497,97 @@ void user::createNewUser(){
     menu(code,userId);
 }
 /*
-adminu(string rid)
+int ulocpresent(string uloc[] , string check, int index)
 {
+  for(int i=0;i<index;i++)
+  {
+  if(uloc[i]==check)
+  return 0;
+}
+return 1;
+}
+
+steiner(string uloc[], int index)
+{
+  struct Gnode *G= createGraph();
+  int i=0;
+  while(G[i].cd!=uloc[index])
+  {
+    i=i+1;
+  }
+  struct Gnode *temp= G[i];
+  struct Gnode root;
+  root.next=0;
+  root.cd=G[i].cd;
+  struct Gnode *treepointer=root;
+  struct Gnode *treepointerlast=root;
+  int min=10000;
+  string minstr;
+  while(visited!=index+1)
+  {
+    while(temp->next!=0)
+    {
+      if(ulocpresent(uloc,temp->next->cd,index)==0)
+      {
+        if((temp->next->d)<min)
+          minstr=temp->next->cd;
+      }
+    }
+    visited++;
+    struct Gnode new;
+    new.cd=minstr;
+    treepointerlast->next=new;
+    treepointerlast=new;
+    for(int i=0;i<index;i++)
+    {
+      if(uloc[i]==minstr)
+      {
+      uloc[i]='0';
+    }
+  }
+    int l=countRL();
+    for(int i=0;i<l;i++)
+    {
+      if(G[i].cd==minstr)
+        {
+        temp=G[i];
+        break;
+      }
+    }
+  }
+}
+void adminu(string rid)
+{
+  string rid2;
   rid2=rid+"orders.txt";
   ifstream fin;
-  fin(rid2);
+  fin.open(rid2);
   if(!fin)
   {
     cout<<"restaurant does not exist";
   }
   while(fin)
   {
-    str uloc[20]='0';
-    str currloc;
+    string uloc[20];
+    string currloc;
     int index=0;
+    for(int i=0;i<20;i++)
+    {
+    uloc[i]="0";
+  }
     while(getline(fin,currloc))
     {
-      str getuloc=currloc[0]+currloc[1]+currloc[2];
+      string getuloc=currloc[0]+currloc[1]+currloc[2];
       if(getuloc[2]==" ")
       {
-        getuloc.pop_back();
+        getuloc.erase(2);
       }
       uloc[index++]=getuloc;
     }
+  }
     // apply steiner on map with restaurant rid and locations in uloc array
     uloc[index]=rid;
-    steiner(uloc);
-  }
-
-
+    steiner(uloc,index);
 }
 */
 int main()
@@ -538,7 +604,7 @@ int main()
           cout<<"Enter Restaurant\n";
           string rid;
           cin>>rid;
-          //adminu(rid);
+      //adminu(rid);
 
 //       cout<<"Work Under Construction:";
     }
