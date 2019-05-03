@@ -41,7 +41,7 @@ class user{
     void userLogin();
     void createNewUser();
 };
-
+string cno;
 struct Gnode{
     struct Gnode *next;
     string cd;
@@ -103,7 +103,7 @@ Gnode * createGraph(){
 int minDistance(int dist[], int sptSet[],int V)
 {
    // Initialize min value
-   int min = 10000,min_index;
+   int min = INT_MAX,min_index;
 
    for (int v = 0; v < V; v++)
      if (sptSet[v] == 0 && dist[v] <= min)
@@ -115,7 +115,9 @@ void printRestaurants(int dist[], int l,struct Gnode * G,string d[],int rnum)
 {
     struct Gnode * tmp;
     int rt;
-   cout<<"Restaurant\t\t\tdistance\n";
+    string rst,ct;
+    float n1,n2;
+   cout<<"Restaurant\t\t\tdistance\t\tRating(for "<<cno<<")\n";
    for (int i = 0; i < rnum; i++){
         tmp=G;
         for(int j=0;j<l;j++){
@@ -124,14 +126,34 @@ void printRestaurants(int dist[], int l,struct Gnode * G,string d[],int rnum)
             break;
         }
     }
-    cout<<"\t"<<d[i]<<"\t\t\t\t"<<dist[rt]<<endl;
+    cout<<"\t"<<d[i]<<"\t\t\t\t"<<dist[rt]<<"\t\t";
+    ifstream fin;
+    fin.open("feedbackAll.txt");
+    while(fin>>rst){
+      fin>>ct>>n1>>n2;
+      if(rst==d[i] && ct==cno){
+        cout<<n1/n2<<endl;
+      }
+    }
+    cout<<endl;
+    fin.close();
    }
 }
 void dijkstra(string s,string d[],int rnum){
     struct Gnode * G= createGraph();
     int l=countRL();
-    string path[l];
-    int pct=0;
+    //displaying the Graph
+    /*struct Gnode * gs1;
+    for(int i=0;i<l;i++){
+      gs1=G+i;
+      while(gs1){
+        cout<<gs1->cd<<" "<<gs1->d<<" ";
+        gs1=(gs1->next);
+
+      }
+      cout<<endl;
+    }*/
+    //--------------------
     int src;
     struct Gnode * tmp=G;
     for(int i=0;i<l;i++){
@@ -140,7 +162,6 @@ void dijkstra(string s,string d[],int rnum){
         break;
         }
     }
-    path[pct++]=s;
     int * dist=new int[l];
     int * sptSet=new int[l];
     for(int i=0;i<l;i++){
@@ -149,42 +170,65 @@ void dijkstra(string s,string d[],int rnum){
         }
 
     dist[src]=0;
-    int v;
-    struct Gnode * tmpk;
-     for (int count = 0; count < l-1; count++) {
+    int countVis=0;
+    string land;
+    int landnum,dland;
+     while(countVis<l) {
         int u = minDistance(dist, sptSet,l);
         sptSet[u] = 1;
-
+        countVis++;
        // Update dist value of the adjacent vertices of the picked vertex.
-       tmp=G[u].next;
+       tmp=G+u;
+       tmp=tmp->next;
        while(tmp){
-        tmpk=G;
-        for(int i=0;i<l;i++){
-            if(tmpk[i].cd==tmp->cd){
-                v=tmpk[i].d;
-                break;
-                }
-            }
-         if (!sptSet[v] && dist[u] != INT_MAX && dist[u]+tmp->d < dist[v]){
-            dist[v] = dist[u] + tmp->d;}
+        dland=tmp->d;
+        land=tmp->cd;
+        if(land[0]=='R'){
+          landnum=(int)land[1]-48+15;
+        }
+        else if(land[0]=='L'){
+          if(land.length()==2){
+          landnum=(int)land[1]-48;
+          }
+          else{
+            landnum=(((int)land[1]-48)*10)+(int)land[2]-48;
+          }
+        }
+        if(sptSet[landnum]==0){
+          dist[landnum]=min(dist[landnum],dland+dist[u]);
+        }
         tmp=tmp->next;
      }
      }
      // print the constructed distance array
      printRestaurants(dist,l,G,d,rnum);
 }
-void menu(string loc,string uid){
+
+void menu(string loc,string uid,int cuisineTake,string cuisineNo){
     string a;
     dish D;
     dish d1;
+    int sugg=0,avg;
+    if(cuisineTake==0){
     cout<<"\n\n\t\t\t\t\t\t\t=====EXPLORE YOUR FAVOURITE CUISINES====="<<endl;
     cout<<"\n\n\n\t===========================\t\t\t==========================\t\t\t\t==========================="<<endl;
     cout<<"\n[1] NORTH INDIAN\n[2] MUGHLAI\n[3] CHINESE\n[4] CONTINENTAL\n[5] SOUTH INDIAN\n[6] HYDERABADI\n[7] THAI\n[8] ITALIAN\n===========================\t\t\t==============================\t\t\t\t===========================\n\n\n\t\t\t\t\t\t\t\t[9] EXIT"<<endl;
     cout<<"\n\t======================================================================================================================================="<<endl;
     cout<<"Enter cuisine number:";
     cin>>a;
-    string cno="C"+a;
+    if(a=="9"){
+      return;
+    }
+  }
+  else{
+    a=cuisineNo;
+    sugg=1;
+    avg=cuisineTake;
+    cout<<"\nAll these Restaurants have your preferences\n\n";
+  }
+    cno="C"+a;
     system("clear");
+
     ifstream fin;
     fin.open("Rcuisines.txt");
     if(!fin)
@@ -224,8 +268,15 @@ void menu(string loc,string uid){
             cout<<"\t\t\t\t\tORDER-ORDER\n\n\n";
             while(D.dno[0]!='C'){
                 fiin>>D.dno>>D.dname>>D.dprice>>D.dtime;
-                if(D.dno[0]!='C')
+                if(D.dno[0]!='C'){
+                if(sugg==0)
                 cout<<D.dno<<" "<<D.dname<<" "<<D.dprice<<" "<<D.dtime<<endl;
+                else{
+                  if(D.dprice>=avg-50 && D.dprice<=avg+50){
+                    cout<<D.dno<<" "<<D.dname<<" "<<D.dprice<<" "<<D.dtime<<endl;
+                  }
+                }
+              }
             }
             break;
         }
@@ -402,10 +453,68 @@ fin.close();
 remove("ordered.txt");
 rename("tempord.txt","ordered.txt");
 }
-void suggestion(string userId){
+
+string suggestion(string userId,int & avg)
+{
+  system("clear");
   //to give suggestions
-  cout<<"\n\n\n\n\n\t****SUGGESTIONS for you****";
+  ifstream fin;
+  fin.open("userHistory.txt");
+  if(!fin)
+    cout<<"userHistory.txt file not found for FEEDBACK\n";
+  string id,c,mxc="C1";
+  int cpeople,cmrp,mx=0;
+  avg=0;
+  char sug;
+  while(fin>>id)
+  {
+    if(id==userId)
+    {
+      for(int i=0;i<8;i++){
+        fin>>c>>cmrp>>cpeople;
+        if(cpeople>mx){
+          mx=cpeople;
+          mxc=c;
+          avg=(cmrp)/cpeople;
+        }
+      }
+    }
+    else{
+        for(int i=0;i<8;i++){
+          fin>>c>>cmrp>>cpeople;
+        }
+    }
+  }
+  fin.close();
+  if(avg==0)
+  {
+    cout<<"YOU HAVE NOT ORDERED ANYTHING YET! NO SUGGESTIONS FOR YOU";
+    cout<<"\n\n\t\tPress enter to continue";
+    string tmp;
+    getline(cin,tmp);
+    getline(cin,tmp);
+    return "x";
+  }
+  else
+  {
+    cout<<"\n\n\n\n\n\t****  SUGGESTIONS FOR YOU  ****\n\n\n"<<endl;
+    cout<<"According to your past food orders,we think you will love these cuisines"<<endl;
+    cout<<"YOU WANT TO GO WITH THE SUGGESTION(y/n)"<<endl;
+    cin>>sug;
+    if(sug=='n')
+    {
+      return "x";
+    }
+    else if(sug=='y')
+    {
+      string aa;
+      aa=mxc[1];
+      //menu(cd,userId,1,aa);
+      return aa;
+  }
 }
+}
+
 void user::userLogin(){
     system("clear");
     cout<<"\t\t\t\t If new user enter id=0 and pass=0"<<endl;
@@ -444,8 +553,13 @@ void user::userLogin(){
     }
     else{
         feedback(userId);
-        suggestions(userId);
-        menu(cd,userId);
+        string sug;
+        int avg;
+        sug=suggestion(userId,avg);
+        if(sug=="x")
+          menu(cd,userId,0,"x");
+        else
+          menu(cd,userId,avg,sug);
         }
     }
 }
@@ -494,7 +608,7 @@ void user::createNewUser(){
     fout<<endl<<userId<<" C1 0 0 C2 0 0 C3 0 0 C4 0 0 C5 0 0 C6 0 0 C7 0 0 C8 0 0 ";
     fout.close();
     cout<<"------------Id created sucessfully.Enjoy OrderMeFood!!------------";
-    menu(code,userId);
+    menu(code,userId,0,0);
 }
 /*
 int ulocpresent(string uloc[] , string check, int index)
@@ -604,7 +718,7 @@ int main()
           cout<<"Enter Restaurant\n";
           string rid;
           cin>>rid;
-      //adminu(rid);
+          //adminu(rid);
 
 //       cout<<"Work Under Construction:";
     }
