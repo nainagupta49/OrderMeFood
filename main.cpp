@@ -646,7 +646,168 @@ return 1;
 
 
 */
+int present(string uloc[], int ind, int uindex)
+{
 
+  for(int i=0;i<uindex;i++)
+  {
+    string curr=uloc[i];
+    int indexcheck=0;
+    if(int(curr[0])==76)
+    {
+      if(curr.length()==3)
+      {
+        indexcheck=((curr[1]-48)*10)+(curr[2]-48);
+      }
+      else
+      {
+        indexcheck=curr[1]-48;
+      }
+    }
+    else
+    {
+      indexcheck=curr[1]-48+15;
+    }
+    if(indexcheck-1==ind)
+    {
+      return 0;
+    }
+  }
+  return 1;
+}
+void steiner(string uloc[], int index)
+{
+  int i=0;
+  int sendindex=0;
+  while(i<3)
+  {
+  if(i==0)
+  {
+    int sendindex=index;
+  }
+  int *distptrstner = dijkstra(uloc[sendindex]);
+  int l=countRL();
+  int rmin=INT_MAX;
+  string rminind;
+  for(int i=0;i<l;i++)
+  {
+    if(distptrstner[i]<rmin && present(uloc,i,index)==0)
+    {
+      rmin=distptrstner[i];
+      string out;
+      if(i<15)
+      {
+        out="L";
+        string add = to_string(i+1);
+        out+=add;
+        rminind=out;
+      }
+    }
+  }
+  cout<<rminind;
+  if(i!=2)
+  {
+    cout<<"->";
+  }
+  for(int i=0;i<index;i++)
+  {
+    if(uloc[i]==rminind)
+    {
+      sendindex=i;
+      break;
+    }
+  }
+  i++;
+}
+
+
+  /*int i=0;
+  while(G[i].cd!=uloc[index])
+  {
+    i=i+1;
+  }
+  struct Gnode *temp= G[i];
+  struct Gnode root;dj
+  root.next=0;
+  root.cd=G[i].cd;
+  struct Gnode *treepointer=root;
+  struct Gnode *treepointerlast=root;
+  int min=10000;
+  string minstr;
+  while(visited!=index+1)
+  {
+    while(temp->next!=0)
+    {
+      if(ulocpresent(uloc,temp->next->cd,index)==0)
+      {
+        if((temp->next->d)<min)
+          minstr=temp->next->cd;
+      }
+    }
+    visited++;
+    struct Gnode new;
+    new.cd=minstr;
+    treepointerlast->next=new;
+    treepointerlast=new;
+    for(int i=0;i<index;i++)
+    {
+      if(uloc[i]==minstr)
+      {
+      uloc[i]='0';
+    }
+  }
+    int l=countRL();
+    for(int i=0;i<l;i++)
+    {
+      if(G[i].cd==minstr)
+        {
+        temp=G[i];
+        break;
+      }
+    }
+  }
+  */
+}
+void adminu(string rid)
+{
+  string rid2;
+  rid2=rid+"orders.txt";
+
+  ifstream fin;
+  fin.open(rid2);
+  if(!fin)
+  {
+    cout<<"restaurant does not exist";
+  }
+    string uloc[20];
+    int index=0;
+    for(int i=0;i<20;i++)
+    {
+    uloc[i]="0";
+  }
+  while(fin)
+  {
+
+    string currloc;
+    getline(fin,currloc);
+    while(getline(fin,currloc))
+    {
+
+      string getuloc;
+      getuloc=currloc[0];
+      getuloc+=currloc[1];
+      getuloc+=currloc[2];
+      if(int(getuloc[2])==32)
+      {
+        getuloc.erase(2);
+      }
+      uloc[index++]=getuloc;
+    }
+  }
+    // apply steiner on map with restaurant rid and locations in uloc array
+    uloc[index]=rid;
+    steiner(uloc,index);
+}
 
 int main()
 {
@@ -663,7 +824,7 @@ int main()
           string rid;
           cin>>rid;
           cout<<rid<<"->";
-        //  adminu(rid);
+          adminu(rid);
 
 //       cout<<"Work Under Construction:";
     }
