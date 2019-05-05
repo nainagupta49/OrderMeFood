@@ -111,8 +111,11 @@ int minDistance(int dist[], int sptSet[],int V)
 
    return min_index;
 }
-void printRestaurants(int dist[], int l,struct Gnode * G,string d[],int rnum)
+void printRestaurants(int *dist,string d[],int rnum)
 {
+    struct Gnode *G = createGraph();
+    int l= countRL();
+
     struct Gnode * tmp;
     int rt;
     string rst,ct;
@@ -139,7 +142,8 @@ void printRestaurants(int dist[], int l,struct Gnode * G,string d[],int rnum)
     fin.close();
    }
 }
-void dijkstra(string s,string d[],int rnum){
+int *dijkstra(string s)
+{
     struct Gnode * G= createGraph();
     int l=countRL();
     //displaying the Graph
@@ -180,19 +184,24 @@ void dijkstra(string s,string d[],int rnum){
        // Update dist value of the adjacent vertices of the picked vertex.
        tmp=G+u;
        tmp=tmp->next;
-       while(tmp){
+       while(tmp)
+       {
         dland=tmp->d;
         land=tmp->cd;
-        if(land[0]=='R'){
+        if(land[0]=='R')
+       {
           landnum=(int)land[1]-48+15;
-        }
-        else if(land[0]=='L'){
-          if(land.length()==2){
+       }
+        else if(land[0]=='L')
+        {
+          if(land.length()==2)
+        {
           landnum=(int)land[1]-48;
-          }
-          else{
+        }
+        else
+        {
             landnum=(((int)land[1]-48)*10)+(int)land[2]-48;
-          }
+        }
         }
         if(sptSet[landnum]==0){
           dist[landnum]=min(dist[landnum],dland+dist[u]);
@@ -200,8 +209,10 @@ void dijkstra(string s,string d[],int rnum){
         tmp=tmp->next;
      }
      }
+
+     return dist;
      // print the constructed distance array
-     printRestaurants(dist,l,G,d,rnum);
+     //printRestaurants(dist,l,G,d,rnum);
 }
 
 void menu(string loc,string uid,int cuisineTake,string cuisineNo){
@@ -249,7 +260,9 @@ void menu(string loc,string uid,int cuisineTake,string cuisineNo){
         num="0";
     }
     fin.close();
-    dijkstra(loc,Rarr,rnum);
+    int *distpointer = dijkstra(loc);
+    printRestaurants(distpointer, Rarr, rnum);
+
     //--------------------------------
     ifstream fiin;
     string sa,c="C"+a,rloc;
@@ -619,18 +632,102 @@ int ulocpresent(string uloc[] , string check, int index)
   return 0;
 }
 return 1;
+}`
+
+
+
+
+
+
+
+
+
+
+
+
+*/
+int present(string uloc[], int ind, int uindex)
+{
+
+  for(int i=0;i<uindex;i++)
+  {
+    string curr=uloc[i];
+    int indexcheck=0;
+    if(int(curr[0])==76)
+    {
+      if(curr.length()==3)
+      {
+        indexcheck=((curr[1]-48)*10)+(curr[2]-48);
+      }
+      else
+      {
+        indexcheck=curr[1]-48;
+      }
+    }
+    else
+    {
+      indexcheck=curr[1]-48+15;
+    }
+    if(indexcheck-1==ind)
+    {
+      return 0;
+    }
+  }
+  return 1;
+}
+void steiner(string uloc[], int index)
+{
+  int i=0;
+  int sendindex=0;
+  while(i<3)
+  {
+  if(i==0)
+  {
+    int sendindex=index;
+  }
+  int *distptrstner = dijkstra(uloc[sendindex]);
+  int l=countRL();
+  int rmin=INT_MAX;
+  string rminind;
+  for(int i=0;i<l;i++)
+  {
+    if(distptrstner[i]<rmin && present(uloc,i,index)==0)
+    {
+      rmin=distptrstner[i];
+      string out;
+      if(i<15)
+      {
+        out="L";
+        string add = to_string(i+1);
+        out+=add;
+        rminind=out;
+      }
+    }
+  }
+  cout<<rminind;
+  if(i!=2)
+  {
+    cout<<"->";
+  }
+  for(int i=0;i<index;i++)
+  {
+    if(uloc[i]==rminind)
+    {
+      sendindex=i;
+      break;
+    }
+  }
+  i++;
 }
 
-steiner(string uloc[], int index)
-{
-  struct Gnode *G= createGraph();
-  int i=0;
+
+  /*int i=0;
   while(G[i].cd!=uloc[index])
   {
     i=i+1;
   }
   struct Gnode *temp= G[i];
-  struct Gnode root;
+  struct Gnode root;dj
   root.next=0;
   root.cd=G[i].cd;
   struct Gnode *treepointer=root;
@@ -669,30 +766,38 @@ steiner(string uloc[], int index)
       }
     }
   }
+  */
 }
 void adminu(string rid)
 {
   string rid2;
   rid2=rid+"orders.txt";
+
   ifstream fin;
   fin.open(rid2);
   if(!fin)
   {
     cout<<"restaurant does not exist";
   }
-  while(fin)
-  {
     string uloc[20];
-    string currloc;
     int index=0;
     for(int i=0;i<20;i++)
     {
     uloc[i]="0";
   }
+  while(fin)
+  {
+
+    string currloc;
+    getline(fin,currloc);
     while(getline(fin,currloc))
     {
-      string getuloc=currloc[0]+currloc[1]+currloc[2];
-      if(getuloc[2]==" ")
+
+      string getuloc;
+      getuloc=currloc[0];
+      getuloc+=currloc[1];
+      getuloc+=currloc[2];
+      if(int(getuloc[2])==32)
       {
         getuloc.erase(2);
       }
@@ -703,7 +808,7 @@ void adminu(string rid)
     uloc[index]=rid;
     steiner(uloc,index);
 }
-*/
+
 int main()
 {
     int var=0;
@@ -718,7 +823,8 @@ int main()
           cout<<"Enter Restaurant\n";
           string rid;
           cin>>rid;
-          //adminu(rid);
+          cout<<rid<<"->";
+          adminu(rid);
 
 //       cout<<"Work Under Construction:";
     }
